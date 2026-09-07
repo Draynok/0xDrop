@@ -5,166 +5,149 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>0xDrop</title>
     <style>
-        body {
-            background-color: #05050a;
-            color: #e0e0e0;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-        .container {
-            background-color: #0a0a14;
-            padding: 40px;
-            border-radius: 8px;
-            border: 1px solid #00f3ff;
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
-            text-align: center;
-            width: 350px;
-            transition: box-shadow 0.3s ease;
-        }
-        h1 {
-            color: #00f3ff;
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background-color: #020205;
-            border: 1px solid #1a1a3a;
-            color: #00f3ff;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        input:focus {
-            outline: none;
-            border-color: #00f3ff;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
-        }
-        /* Estilizando el input de archivo */
-        input[type="file"]::file-selector-button {
-            background-color: #1a1a3a;
-            color: #00f3ff;
-            border: 1px solid #00f3ff;
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: transparent;
-            border: 2px solid #00f3ff;
-            color: #00f3ff;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        button:hover {
-            background-color: #00f3ff;
-            color: #05050a;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
-        }
-        #status {
-            display: none;
-            margin-top: 20px;
-            font-weight: bold;
-            height: 20px; /* Evita que el contenedor salte */
-        }
-        /* Animación de pulso para cuando está subiendo */
-        .pulsing {
-            animation: pulse 1.5s infinite;
-            color: #00f3ff;
-            text-shadow: 0 0 10px #00f3ff;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
+        /* Mismos estilos base */
+        body { background-color: #05050a; color: #e0e0e0; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .container { background-color: #0a0a14; padding: 40px; border-radius: 8px; border: 1px solid #00f3ff; box-shadow: 0 0 25px rgba(0, 243, 255, 0.15); text-align: center; width: 350px; transition: box-shadow 0.3s ease; }
+        h1 { color: #00f3ff; text-shadow: 0 0 15px rgba(0, 243, 255, 0.8); margin-bottom: 30px; letter-spacing: 2px; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background-color: #020205; border: 1px solid #1a1a3a; color: #00f3ff; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        textarea { resize: vertical; min-height: 100px; }
+        input:focus, textarea:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+        input[type="file"]::file-selector-button { background-color: #1a1a3a; color: #00f3ff; border: 1px solid #00f3ff; padding: 8px; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button.action-btn { width: 100%; padding: 15px; background-color: transparent; border: 2px solid #00f3ff; color: #00f3ff; font-weight: bold; font-size: 16px; border-radius: 4px; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; text-transform: uppercase; }
+        button.action-btn:hover { background-color: #00f3ff; color: #05050a; box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); }
+
+        /* Pestañas para elegir Archivo o Mensaje */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 8px; background: transparent; border: 1px solid #1a1a3a; color: #a0a0a0; cursor: pointer; font-family: inherit; }
+        .tab-btn.active { border-color: #00f3ff; color: #00f3ff; background-color: rgba(0, 243, 255, 0.1); }
+
+        #status { display: none; margin-top: 20px; font-weight: bold; height: 20px; }
+        .pulsing { animation: pulse 1.5s infinite; color: #00f3ff; text-shadow: 0 0 10px #00f3ff; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
-
 <div class="container" id="box">
     <h1>0xDrop</h1>
     <form id="dropForm">
-        <input type="text" id="codigo" placeholder="Código de destino" required autocomplete="off">
-        <input type="file" id="file" required>
-        <button type="submit" id="btnSubmit">Iniciar Drop</button>
+        <input type="text" id="destinatario" placeholder="Usuario destinatario" required autocomplete="off">
+        <input type="text" id="codigo" placeholder="Código de destino (Opcional)" autocomplete="off">
+
+        <div class="tabs">
+            <button type="button" class="tab-btn active" id="btnModoArchivo" onclick="cambiarModo('archivo')">Archivo</button>
+            <button type="button" class="tab-btn" id="btnModoTexto" onclick="cambiarModo('texto')">Texto</button>
+        </div>
+
+        <!-- Zona de Archivos -->
+        <div id="modoArchivo">
+            <input type="file" id="files" multiple>
+        </div>
+
+        <!-- Zona de Texto -->
+        <div id="modoTexto" style="display: none;">
+            <textarea id="mensajeTexto" placeholder="Escribí tu mensaje acá..."></textarea>
+        </div>
+
+        <button type="submit" class="action-btn" id="btnSubmit">Iniciar Drop</button>
     </form>
     <div id="status"></div>
 </div>
 
 <script>
+    let modoActual = 'archivo';
+
+    function cambiarModo(modo) {
+        modoActual = modo;
+        if(modo === 'archivo') {
+            document.getElementById('btnModoArchivo').classList.add('active');
+            document.getElementById('btnModoTexto').classList.remove('active');
+            document.getElementById('modoArchivo').style.display = 'block';
+            document.getElementById('modoTexto').style.display = 'none';
+            document.getElementById('files').required = true;
+            document.getElementById('mensajeTexto').required = false;
+        } else {
+            document.getElementById('btnModoTexto').classList.add('active');
+            document.getElementById('btnModoArchivo').classList.remove('active');
+            document.getElementById('modoTexto').style.display = 'block';
+            document.getElementById('modoArchivo').style.display = 'none';
+            document.getElementById('files').required = false;
+            document.getElementById('mensajeTexto').required = true;
+        }
+    }
+
     document.getElementById('dropForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita que la página se recargue
+        e.preventDefault();
 
         const btn = document.getElementById('btnSubmit');
         const status = document.getElementById('status');
         const box = document.getElementById('box');
-        const form = e.target;
 
-        // Estado de carga
         btn.style.display = 'none';
         status.style.display = 'block';
         status.className = 'pulsing';
         status.innerText = 'Transmitiendo datos...';
 
         const formData = new FormData();
+        formData.append('destinatario', document.getElementById('destinatario').value);
         formData.append('codigo', document.getElementById('codigo').value);
-        formData.append('file', document.getElementById('file').files[0]);
+
+        // Si está en modo archivo, agregamos los archivos normales
+        if (modoActual === 'archivo') {
+            const fileInput = document.getElementById('files');
+            if (fileInput.files.length > 5) {
+                alert("Límite excedido: Podés enviar hasta 5 archivos a la vez.");
+                return restablecer(btn, status, box);
+            }
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('files', fileInput.files[i]);
+            }
+        }
+        // Si está en modo texto, convertimos el string a un archivo .txt!
+        else {
+            const texto = document.getElementById('mensajeTexto').value;
+            // Creamos un archivo virtual (Blob)
+            const blob = new Blob([texto], { type: 'text/plain' });
+            // Le ponemos un nombre con la hora para que no se sobreescriban
+            const nombreArchivo = `Mensaje_${new Date().toISOString().slice(11,19).replace(/:/g, '-')}.txt`;
+            formData.append('files', blob, nombreArchivo);
+        }
 
         try {
-            // Enviamos los datos a nuestro propio servidor backend
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             });
 
             if(response.ok) {
-                // Animación de éxito
                 status.className = '';
                 status.style.color = '#00ffcc';
                 status.style.textShadow = '0 0 15px #00ffcc';
-                status.innerText = 'Drop completado. Archivo asegurado.';
+                status.innerText = 'Drop completado. Datos asegurados.';
                 box.style.boxShadow = '0 0 30px rgba(0, 255, 204, 0.4)';
                 box.style.borderColor = '#00ffcc';
-                form.reset();
+                document.getElementById('dropForm').reset();
             } else {
-                throw new Error('Fallo en el servidor');
+                const errorMsg = await response.text();
+                throw new Error(errorMsg);
             }
         } catch (error) {
-            // Animación de error
             status.className = '';
             status.style.color = '#ff0055';
             status.style.textShadow = '0 0 15px #ff0055';
-            status.innerText = 'Error de conexión. Drop fallido.';
+            status.innerText = error.message || 'Error de conexión. Drop fallido.';
             box.style.boxShadow = '0 0 30px rgba(255, 0, 85, 0.4)';
             box.style.borderColor = '#ff0055';
         }
 
-        // Volver al estado normal después de 4 segundos
-        setTimeout(() => {
-            btn.style.display = 'block';
-            status.style.display = 'none';
-            box.style.boxShadow = '0 0 25px rgba(0, 243, 255, 0.15)';
-            box.style.borderColor = '#00f3ff';
-        }, 4000);
+        setTimeout(() => restablecer(btn, status, box), 4000);
     });
+
+    function restablecer(btn, status, box) {
+        btn.style.display = 'block';
+        status.style.display = 'none';
+        box.style.boxShadow = '0 0 25px rgba(0, 243, 255, 0.15)';
+        box.style.borderColor = '#00f3ff';
+    }
 </script>
 </body>
 </html>

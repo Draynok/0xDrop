@@ -72,4 +72,17 @@ public class DashboardController {
             return ResponseEntity.badRequest().build();
         }
     }
+    // 4. Borrar el archivo físicamente
+    @DeleteMapping("/borrar")
+    public ResponseEntity<String> borrarArchivo(@RequestParam String username, @RequestParam String filename) {
+        String filePath = System.getProperty("user.dir") + "/uploads/" + username + "/" + filename;
+        File file = new File(filePath);
+
+        // Si el archivo existe y el sistema operativo nos deja borrarlo
+        if (file.exists() && file.delete()) {
+            return ResponseEntity.ok("Archivo purgado del sistema.");
+        } else {
+            return ResponseEntity.status(404).body("Error: Archivo no encontrado o bloqueado.");
+        }
+    }
 }

@@ -14,85 +14,51 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
+        /* Contenedor base (Tamaño Login) */
         .container {
             background-color: #0a0a14;
             padding: 40px;
             border-radius: 8px;
             border: 1px solid #00f3ff;
             box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
-            width: 400px;
+            width: 100%;
+            max-width: 400px;
+            transition: max-width 0.4s ease; /* Animación suave al agrandarse */
             text-align: center;
         }
-        h1, h2 {
-            color: #00f3ff;
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
-            letter-spacing: 2px;
+        /* Clase que se agrega al entrar al Dashboard */
+        .container.wide {
+            max-width: 800px;
         }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background-color: #020205;
-            border: 1px solid #1a1a3a;
-            color: #00f3ff;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        input:focus {
-            outline: none;
-            border-color: #00f3ff;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: transparent;
-            border: 2px solid #00f3ff;
-            color: #00f3ff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-            text-transform: uppercase;
-        }
-        button:hover {
-            background-color: #00f3ff;
-            color: #05050a;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
-        }
-        .error { color: #ff0055; text-shadow: 0 0 10px #ff0055; margin-top: 10px; display: none; }
-
-        /* Estilos del Dashboard */
-        #dashboardView { display: none; }
-        .file-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             text-align: left;
+            margin-top: 20px;
         }
-        .file-item {
-            background-color: #1a1a3a;
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 3px solid #00f3ff;
-        }
-        .btn-download {
-            width: auto;
-            padding: 5px 15px;
-            margin-top: 0;
-            font-size: 14px;
-        }
+        h1, h2, h3 { color: #00f3ff; text-shadow: 0 0 15px rgba(0, 243, 255, 0.8); letter-spacing: 2px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background-color: #020205; border: 1px solid #1a1a3a; color: #00f3ff; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        button { width: 100%; padding: 12px; background-color: transparent; border: 2px solid #00f3ff; color: #00f3ff; font-weight: bold; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; text-transform: uppercase; }
+        button:hover { background-color: #00f3ff; color: #05050a; box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); }
+        .error { color: #ff0055; text-shadow: 0 0 10px #ff0055; margin-top: 10px; display: none; }
+        #dashboardView { display: none; }
+        .list-container { background-color: #05050a; border: 1px solid #1a1a3a; padding: 15px; border-radius: 4px; min-height: 200px; max-height: 400px; overflow-y: auto; }
+        .item-box { background-color: #1a1a3a; margin-bottom: 10px; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #00f3ff; }
+        .item-box span { font-size: 14px; word-break: break-all; }
+        .item-box small { color: #a0a0a0; display: block; font-size: 11px; margin-top: 4px;}
+        .btn-small { width: auto; padding: 5px 15px; margin-top: 0; font-size: 12px; }
+        .btn-temp { border-color: #ff9900; color: #ff9900; }
+        .btn-temp:hover { background-color: #ff9900; color: #05050a; box-shadow: 0 0 20px rgba(255, 153, 0, 0.6); }
+        .btn-trash { border-color: #ff0055; color: #ff0055; margin-left: 5px; }
+        .btn-trash:hover { background-color: #ff0055; color: #05050a; box-shadow: 0 0 10px rgba(255, 0, 85, 0.6); }
+        .action-buttons { display: flex; align-items: center; }
     </style>
 </head>
 <body>
-
-<div class="container">
+<div class="container" id="mainContainer">
     <!-- VISTA DE LOGIN -->
     <div id="loginView">
         <h1>0xDrop Access</h1>
@@ -101,22 +67,36 @@
             <input type="password" id="password" placeholder="Contraseña" required>
             <button type="submit">Iniciar Sesión</button>
         </form>
-        <div id="loginError" class="error">Acceso denegado. Credenciales inválidas.</div>
+        <div id="loginError" class="error">Acceso denegado.</div>
+        <a href="/registro.html" style="display:block; margin-top:20px; color:#00f3ff; font-size:13px; text-decoration:none;">Crear cuenta nueva</a>
     </div>
 
     <!-- VISTA DEL DASHBOARD -->
     <div id="dashboardView">
-        <h2>Bandeja Segura</h2>
-        <p>Usuario: <span id="displayUser" style="color:#00f3ff; font-weight:bold;"></span></p>
-        <ul class="file-list" id="fileList">
-            <!-- Los archivos van a aparecer acá -->
-        </ul>
-        <button onclick="logout()" style="border-color: #ff0055; color: #ff0055; margin-top: 30px;">Cerrar Sesión</button>
+        <h2>Terminal Principal</h2>
+        <p style="text-align: left;">Operador: <span id="displayUser" style="color:#00f3ff; font-weight:bold;"></span></p>
+
+        <div class="dashboard-grid">
+            <div>
+                <h3>Bandeja de Archivos</h3>
+                <div class="list-container" id="fileList"></div>
+            </div>
+            <div>
+                <h3>Gestión de Códigos</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button onclick="generarCodigo('PERMANENTE')" style="margin-top: 0;">+ Permanente</button>
+                    <button onclick="generarCodigo('TEMPORAL')" class="btn-temp" style="margin-top: 0;">+ Temporal (2H)</button>
+                </div>
+                <div class="list-container" id="codeList"></div>
+            </div>
+        </div>
+        <button onclick="logout()" style="border-color: #ff0055; color: #ff0055; margin-top: 30px; width: 200px;">Desconectar</button>
     </div>
 </div>
 
 <script>
     let currentUser = '';
+    const container = document.getElementById('mainContainer');
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -124,68 +104,105 @@
         const pass = document.getElementById('password').value;
 
         try {
-            const response = await fetch(`/api/dashboard/login?username=${user}&password=${pass}`, {
-                method: 'POST'
-            });
-
+            const response = await fetch(`/api/dashboard/login?username=${user}&password=${pass}`, { method: 'POST' });
             if(response.ok) {
                 currentUser = user;
+                // Acá hacemos que el contenedor se ensanche
+                container.classList.add('wide');
                 document.getElementById('loginView').style.display = 'none';
                 document.getElementById('dashboardView').style.display = 'block';
                 document.getElementById('displayUser').innerText = currentUser;
                 cargarArchivos();
+                cargarCodigos();
             } else {
                 document.getElementById('loginError').style.display = 'block';
             }
-        } catch (error) {
-            console.error("Error en la conexión");
-        }
+        } catch (error) { console.error("Error en la conexión"); }
     });
 
-    async function cargarArchivos() {
+    async function cargarArchivos() { /* Mismo código de antes */
         const list = document.getElementById('fileList');
-        list.innerHTML = 'Cargando datos...';
-
+        list.innerHTML = '<p style="color:#888;">Cargando bandeja...</p>';
         try {
             const response = await fetch(`/api/dashboard/archivos?username=${currentUser}`);
             if(response.ok) {
                 const archivos = await response.json();
                 list.innerHTML = '';
-
                 if(archivos.length === 0) {
-                    list.innerHTML = '<p style="text-align:center; color:#888;">No hay archivos en la bandeja.</p>';
+                    list.innerHTML = '<p style="color:#888; text-align:center;">Bandeja vacía.</p>';
                     return;
                 }
-
                 archivos.forEach(file => {
-                    const li = document.createElement('li');
-                    li.className = 'file-item';
-
-                    const span = document.createElement('span');
-                    span.innerText = file;
-
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-download';
-                    btn.innerText = 'Descargar';
-                    // Al hacer clic, redirige a la URL de descarga forzada que hicimos en el backend
-                    btn.onclick = () => window.location.href = `/api/dashboard/descargar?username=${currentUser}&filename=${file}`;
-
-                    li.appendChild(span);
-                    li.appendChild(btn);
-                    list.appendChild(li);
+                    const div = document.createElement('div');
+                    div.className = 'item-box';div.innerHTML = `<span>${file}</span> <button class="btn-small" onclick="window.location.href='/api/dashboard/descargar?username=${currentUser}&filename=${file}'">Bajar</button>`;
+                    div.innerHTML = `
+                            <span>${file}</span>
+                            <div class="action-buttons">
+                                <button class="btn-small" onclick="window.location.href='/api/dashboard/descargar?username=${currentUser}&filename=${file}'">Bajar</button>
+                                <button class="btn-small btn-trash" onclick="borrarArchivo('${file}')">🗑️</button>
+                            </div>
+                        `;
+                    list.appendChild(div);
                 });
             }
-        } catch (error) {
-            list.innerHTML = 'Error al leer el directorio.';
-        }
+        } catch (error) { list.innerHTML = 'Error al leer el directorio.'; }
     }
+
+    async function cargarCodigos() { /* Mismo código de antes */
+        const list = document.getElementById('codeList');
+        list.innerHTML = '<p style="color:#888;">Cargando códigos...</p>';
+        try {
+            const response = await fetch(`/api/codigos/listar?username=${currentUser}`);
+            if(response.ok) {
+                const codigos = await response.json();
+                list.innerHTML = '';
+                if(codigos.length === 0) { list.innerHTML = '<p style="color:#888; text-align:center;">No tenés códigos activos.</p>'; return; }
+                codigos.forEach(cod => {
+                    const div = document.createElement('div');
+                    div.className = 'item-box';
+                    if(cod.tipo === 'TEMPORAL') div.style.borderLeftColor = '#ff9900';
+                    let extraInfo = cod.tipo === 'TEMPORAL' ? `<small>Vence: ${new Date(cod.fechaVencimiento).toLocaleString()}</small>` : '<small>No expira</small>';
+                    div.innerHTML = `<div><strong style="color: ${cod.tipo === 'TEMPORAL' ? '#ff9900' : '#00f3ff'}">${cod.valor}</strong>${extraInfo}</div>`;
+                    list.appendChild(div);
+                });
+            }
+        } catch (error) { list.innerHTML = 'Error al leer los códigos.'; }
+    }
+
+    async function generarCodigo(tipo) { /* Mismo código de antes */
+        try {
+            const response = await fetch(`/api/codigos/generar?username=${currentUser}&tipo=${tipo}`, { method: 'POST' });
+            if(response.ok) cargarCodigos(); else alert('Error al generar el código');
+        } catch (error) { console.error("Error al conectar"); }
+    }
+
+    async function borrarArchivo(filename) {
+            // Un pequeño cartel de confirmación por si tocás sin querer
+            if(!confirm(`¿Seguro que querés eliminar permanentemente "${filename}"?`)) return;
+
+            try {
+                const response = await fetch(`/api/dashboard/borrar?username=${currentUser}&filename=${filename}`, {
+                    method: 'DELETE'
+                });
+
+                if(response.ok) {
+                    cargarArchivos(); // Recargamos la bandeja automáticamente
+                } else {
+                    alert('Error al borrar el archivo en el servidor.');
+                }
+            } catch (error) {
+                console.error("Error al conectar con la API de borrado");
+            }
+        }
 
     function logout() {
         currentUser = '';
         document.getElementById('loginForm').reset();
         document.getElementById('loginError').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'none';
-        document.getElementById('loginView').style.display = 'block';
+        // Volvemos a achicar el contenedor
+        container.classList.remove('wide');
+        setTimeout(() => { document.getElementById('loginView').style.display = 'block'; }, 200);
     }
 </script>
 </body>

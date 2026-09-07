@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xDrop - Registro</title>
+    <style>
+        body {
+            background-color: #05050a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #0a0a14;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #00f3ff;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
+            width: 350px;
+            text-align: center;
+        }
+        h1 {
+            color: #00f3ff;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #020205;
+            border: 1px solid #1a1a3a;
+            color: #00f3ff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00f3ff;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            margin: 15px 0;
+            font-size: 13px;
+            text-align: left;
+            color: #a0a0a0;
+        }
+        .checkbox-group input {
+            margin-right: 10px;
+            accent-color: #00f3ff;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: transparent;
+            border: 2px solid #00f3ff;
+            color: #00f3ff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+        button:hover {
+            background-color: #00f3ff;
+            color: #05050a;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+        .links {
+            margin-top: 25px;
+            font-size: 13px;
+        }
+        .links a {
+            color: #00f3ff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .links a:hover {
+            text-shadow: 0 0 5px #00f3ff;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>0xDrop Init</h1>
+    <form id="registroForm">
+        <input type="text" id="username" placeholder="Nuevo Usuario" required autocomplete="off">
+        <input type="password" id="password" placeholder="Contraseña" required>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="libre">
+            <label for="libre">Habilitar recibimiento libre (sin código)</label>
+        </div>
+
+        <button type="submit">Crear Cuenta</button>
+    </form>
+    <div id="status"></div>
+
+    <div class="links">
+        <a href="/dashboard.html">Login</a> |
+        <a href="/index.html">Enviar Drop</a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registroForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const status = document.getElementById('status');
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const libre = document.getElementById('libre').checked;
+
+        // Armamos el JSON tal cual lo hicimos en Postman aquella vez
+        const payload = {
+            username: user,
+            password: pass,
+            aceptaRecibimientoLibre: libre
+        };
+
+        try {
+            const response = await fetch('/api/usuarios/registro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            status.style.display = 'block';
+
+            if(response.ok) {
+                status.style.color = '#00ffcc';
+                status.style.textShadow = '0 0 15px #00ffcc';
+                status.innerText = 'Usuario creado. Ya podés iniciar sesión.';
+                document.getElementById('registroForm').reset();
+            } else {
+                const errorMsg = await response.text();
+                status.style.color = '#ff0055';
+                status.style.textShadow = '0 0 15px #ff0055';
+                status.innerText = errorMsg;
+            }
+        } catch (error) {
+            status.style.display = 'block';
+            status.style.color = '#ff0055';
+            status.style.textShadow = '0 0 15px #ff0055';
+            status.innerText = 'Error de conexión con el servidor.';
+        }
+    });
+</script>
+</body>
+</html>
