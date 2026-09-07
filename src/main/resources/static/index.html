@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xDrop</title>
+    <style>
+        body {
+            background-color: #05050a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #0a0a14;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #00f3ff;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
+            text-align: center;
+            width: 350px;
+            transition: box-shadow 0.3s ease;
+        }
+        h1 {
+            color: #00f3ff;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #020205;
+            border: 1px solid #1a1a3a;
+            color: #00f3ff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00f3ff;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        /* Estilizando el input de archivo */
+        input[type="file"]::file-selector-button {
+            background-color: #1a1a3a;
+            color: #00f3ff;
+            border: 1px solid #00f3ff;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: transparent;
+            border: 2px solid #00f3ff;
+            color: #00f3ff;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background-color: #00f3ff;
+            color: #05050a;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+        }
+        #status {
+            display: none;
+            margin-top: 20px;
+            font-weight: bold;
+            height: 20px; /* Evita que el contenedor salte */
+        }
+        /* Animación de pulso para cuando está subiendo */
+        .pulsing {
+            animation: pulse 1.5s infinite;
+            color: #00f3ff;
+            text-shadow: 0 0 10px #00f3ff;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="box">
+    <h1>0xDrop</h1>
+    <form id="dropForm">
+        <input type="text" id="codigo" placeholder="Código de destino" required autocomplete="off">
+        <input type="file" id="file" required>
+        <button type="submit" id="btnSubmit">Iniciar Drop</button>
+    </form>
+    <div id="status"></div>
+</div>
+
+<script>
+    document.getElementById('dropForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página se recargue
+
+        const btn = document.getElementById('btnSubmit');
+        const status = document.getElementById('status');
+        const box = document.getElementById('box');
+        const form = e.target;
+
+        // Estado de carga
+        btn.style.display = 'none';
+        status.style.display = 'block';
+        status.className = 'pulsing';
+        status.innerText = 'Transmitiendo datos...';
+
+        const formData = new FormData();
+        formData.append('codigo', document.getElementById('codigo').value);
+        formData.append('file', document.getElementById('file').files[0]);
+
+        try {
+            // Enviamos los datos a nuestro propio servidor backend
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if(response.ok) {
+                // Animación de éxito
+                status.className = '';
+                status.style.color = '#00ffcc';
+                status.style.textShadow = '0 0 15px #00ffcc';
+                status.innerText = 'Drop completado. Archivo asegurado.';
+                box.style.boxShadow = '0 0 30px rgba(0, 255, 204, 0.4)';
+                box.style.borderColor = '#00ffcc';
+                form.reset();
+            } else {
+                throw new Error('Fallo en el servidor');
+            }
+        } catch (error) {
+            // Animación de error
+            status.className = '';
+            status.style.color = '#ff0055';
+            status.style.textShadow = '0 0 15px #ff0055';
+            status.innerText = 'Error de conexión. Drop fallido.';
+            box.style.boxShadow = '0 0 30px rgba(255, 0, 85, 0.4)';
+            box.style.borderColor = '#ff0055';
+        }
+
+        // Volver al estado normal después de 4 segundos
+        setTimeout(() => {
+            btn.style.display = 'block';
+            status.style.display = 'none';
+            box.style.boxShadow = '0 0 25px rgba(0, 243, 255, 0.15)';
+            box.style.borderColor = '#00f3ff';
+        }, 4000);
+    });
+</script>
+</body>
+</html>
