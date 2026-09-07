@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xDrop - Terminal</title>
+    <style>
+        body {
+            background-color: #05050a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #0a0a14;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #00f3ff;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
+            width: 400px;
+            text-align: center;
+        }
+        h1, h2 {
+            color: #00f3ff;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
+            letter-spacing: 2px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #020205;
+            border: 1px solid #1a1a3a;
+            color: #00f3ff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00f3ff;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: transparent;
+            border: 2px solid #00f3ff;
+            color: #00f3ff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            text-transform: uppercase;
+        }
+        button:hover {
+            background-color: #00f3ff;
+            color: #05050a;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+        }
+        .error { color: #ff0055; text-shadow: 0 0 10px #ff0055; margin-top: 10px; display: none; }
+
+        /* Estilos del Dashboard */
+        #dashboardView { display: none; }
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .file-item {
+            background-color: #1a1a3a;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #00f3ff;
+        }
+        .btn-download {
+            width: auto;
+            padding: 5px 15px;
+            margin-top: 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- VISTA DE LOGIN -->
+    <div id="loginView">
+        <h1>0xDrop Access</h1>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Usuario" required autocomplete="off">
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+        <div id="loginError" class="error">Acceso denegado. Credenciales inválidas.</div>
+    </div>
+
+    <!-- VISTA DEL DASHBOARD -->
+    <div id="dashboardView">
+        <h2>Bandeja Segura</h2>
+        <p>Usuario: <span id="displayUser" style="color:#00f3ff; font-weight:bold;"></span></p>
+        <ul class="file-list" id="fileList">
+            <!-- Los archivos van a aparecer acá -->
+        </ul>
+        <button onclick="logout()" style="border-color: #ff0055; color: #ff0055; margin-top: 30px;">Cerrar Sesión</button>
+    </div>
+</div>
+
+<script>
+    let currentUser = '';
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        try {
+            const response = await fetch(`/api/dashboard/login?username=${user}&password=${pass}`, {
+                method: 'POST'
+            });
+
+            if(response.ok) {
+                currentUser = user;
+                document.getElementById('loginView').style.display = 'none';
+                document.getElementById('dashboardView').style.display = 'block';
+                document.getElementById('displayUser').innerText = currentUser;
+                cargarArchivos();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        } catch (error) {
+            console.error("Error en la conexión");
+        }
+    });
+
+    async function cargarArchivos() {
+        const list = document.getElementById('fileList');
+        list.innerHTML = 'Cargando datos...';
+
+        try {
+            const response = await fetch(`/api/dashboard/archivos?username=${currentUser}`);
+            if(response.ok) {
+                const archivos = await response.json();
+                list.innerHTML = '';
+
+                if(archivos.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:#888;">No hay archivos en la bandeja.</p>';
+                    return;
+                }
+
+                archivos.forEach(file => {
+                    const li = document.createElement('li');
+                    li.className = 'file-item';
+
+                    const span = document.createElement('span');
+                    span.innerText = file;
+
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-download';
+                    btn.innerText = 'Descargar';
+                    // Al hacer clic, redirige a la URL de descarga forzada que hicimos en el backend
+                    btn.onclick = () => window.location.href = `/api/dashboard/descargar?username=${currentUser}&filename=${file}`;
+
+                    li.appendChild(span);
+                    li.appendChild(btn);
+                    list.appendChild(li);
+                });
+            }
+        } catch (error) {
+            list.innerHTML = 'Error al leer el directorio.';
+        }
+    }
+
+    function logout() {
+        currentUser = '';
+        document.getElementById('loginForm').reset();
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('loginView').style.display = 'block';
+    }
+</script>
+</body>
+</html>
